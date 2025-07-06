@@ -222,6 +222,9 @@ class Model(BaseEstimator):
             y_train = [y_train] * self.n_outputs
             y_val = [y_val] * self.n_outputs
 
+        # Jiahang (hack): only one output since class_weights not supported for multiple outputs
+        y_train, y_val = y_train[0], y_val[0]
+
         if not X_val is None:
             validation_data = [X_val, y_val]
         else:

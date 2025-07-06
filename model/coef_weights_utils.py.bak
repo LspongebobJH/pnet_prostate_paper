@@ -39,7 +39,7 @@ def predict(model, X, loss=None):
 #     else:
 #         n = 1
 #
-#     # print model.inputs[0]._keras_shape, model.targets[0]._keras_shape
+#     # print model.inputs[0].shape, model.targets[0].shape
 #     # print 'model.targets', model.targets[0:n]
 #     # print 'model.inputs[0]', model.inputs[0]
 #     input_tensors = [model.inputs[0],  # input data

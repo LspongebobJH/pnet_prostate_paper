@@ -52,9 +52,9 @@ class AttLayer(Layer):
         super(AttLayer, self).build(input_shape)  # be sure you call this somewhere!
 
     def call(self, x, mask=None):
-        eij = K.tanh(K.dot(x, self.W))
+        eij = K.tanh(tf.matmul(x, self.W))
         ai = K.exp(eij)
-        weights = ai / K.sum(ai, axis=1).dimshuffle(0, 'x')
+        weights = ai / tf.reduce_sum(ai, axis=1).dimshuffle(0, 'x')
         weighted_input = x * weights.dimshuffle(0, 1, 'x')
         weighted_input = weighted_input.sum(axis=1)
         return weighted_input
@@ -82,7 +82,7 @@ class SwitchLayer(Layer):
         super(SwitchLayer, self).build(input_shape)  # Be sure to call this somewhere!
 
     def call(self, x, mask=None):
-        # return K.dot(x, self.kernel)
+        # return tf.matmul(x, self.kernel)
         return x * self.kernel
 
     def compute_output_shape(self, input_shape):
@@ -152,17 +152,17 @@ class Diagonal(Layer):
         super(Diagonal, self).build(input_shape)  # Be sure to call this somewhere!
 
     def call(self, x, mask=None):
-        n_features = x._keras_shape[1]
-        print 'input dimensions {}'.format(x._keras_shape)
+        n_features = x.shape[1]
+        print 'input dimensions {}'.format(x.shape)
 
-        kernel = K.reshape(self.kernel, (1, n_features))
+        kernel = tf.reshape(self.kernel, (1, n_features))
         mult = x * kernel
-        mult = K.reshape(mult, (-1, self.n_inputs_per_node))
-        mult = K.sum(mult, axis=1)
-        output = K.reshape(mult, (-1, self.units))
+        mult = tf.reshape(mult, (-1, self.n_inputs_per_node))
+        mult = tf.reduce_sum(mult, axis=1)
+        output = tf.reshape(mult, (-1, self.units))
 
         if self.use_bias:
-            output = K.bias_add(output, self.bias)
+            output = tf.nn.bias_add(output, self.bias)
         if self.activation_fn is not None:
             output = self.activation_fn(output)
         return output
@@ -304,12 +304,12 @@ class SparseTF(Layer):
         # tt= tf.sparse.transpose(self.kernel_sparse)
         # output = tf.sparse.matmul(tt, tf.transpose(inputs ))
         # output = tf.matmul(tt, inputs )
-        output = K.dot(inputs, tt)
+        output = tf.matmul(inputs, tt)
         # pr.disable()
         # pr.print_stats(sort="time")
         # return tf.transpose(output)
         if self.use_bias:
-            output = K.bias_add(output, self.bias)
+            output = tf.nn.bias_add(output, self.bias)
         if self.activation_fn is not None:
             output = self.activation_fn(output)
 
@@ -397,19 +397,19 @@ class SpraseLayerTF(Layer):
 
     def call(self, x, mask=None):
 
-        n_features = x._keras_shape[1]
+        n_features = x.shape[1]
 
-        print 'input dimensions {}'.format(x._keras_shape)
-        kernel = K.reshape(self.kernel, (1, n_features))
+        print 'input dimensions {}'.format(x.shape)
+        kernel = tf.reshape(self.kernel, (1, n_features))
 
         mult = x * kernel
 
-        mult = K.reshape(mult, (-1, self.n_inputs_per_node))
-        mult = K.sum(mult, axis=1)
-        output = K.reshape(mult, (-1, self.units))
+        mult = tf.reshape(mult, (-1, self.n_inputs_per_node))
+        mult = tf.reduce_sum(mult, axis=1)
+        output = tf.reshape(mult, (-1, self.units))
 
         if self.use_bias:
-            output = K.bias_add(output, self.bias)
+            output = tf.nn.bias_add(output, self.bias)
         if self.activation_fn is not None:
             output = self.activation_fn(output)
 
@@ -510,10 +510,10 @@ class SpraseLayerWithConnection(Layer):
             print 'connections', self.edges[i]
             w = self.kernel[i].T
             inn = x[:, self.edges[i]]
-            y0 = K.dot(inn, w)
+            y0 = tf.matmul(inn, w)
             # print K.int_shape(y0)
             if self.use_bias:
-                y0 = K.bias_add(y0, self.bias[i])
+                y0 = tf.nn.bias_add(y0, self.bias[i])
             if self.activation is not None:
                 y0 = self.activation(y0)
 
@@ -521,24 +521,24 @@ class SpraseLayerWithConnection(Layer):
             output_list.append(y0)
         # y = [x[:, self.edges[i]].dot(W[i].T) for i in range(n_outputs)]
 
-        # n_features= x._keras_shape[1]
+        # n_features= x.shape[1]
         #
-        # print 'input dimensions {}'.format(x._keras_shape)
-        # kernel = K.reshape(self.kernel, (1, n_features))
+        # print 'input dimensions {}'.format(x.shape)
+        # kernel = tf.reshape(self.kernel, (1, n_features))
         #
         # mult = x * kernel
         #
-        # mult = K.reshape(mult, (-1, self.n_inputs_per_node))
-        # mult= K.sum(mult, axis=1)
-        # output = K.reshape(mult, (-1, self.units))
+        # mult = tf.reshape(mult, (-1, self.n_inputs_per_node))
+        # mult= tf.reduce_sum(mult, axis=1)
+        # output = tf.reshape(mult, (-1, self.units))
 
         # if self.use_bias:
-        #     output = K.bias_add(output, self.bias)
+        #     output = tf.nn.bias_add(output, self.bias)
         # if self.activation is not None:
         #     output = self.activation(output)
         print 'conactenating '
         output = K.concatenate(output_list, axis=-1)
-        output = K.reshape(output, (-1, self.units))
+        output = tf.reshape(output, (-1, self.units))
         # output = concatenate(output)
         # print K.int_shape(output)
         return output
@@ -587,9 +587,9 @@ class L1L2_with_map(Regularizer):
         x_masked = x * self.connection_map.astype(K.floatx())
         regularization = 0.
         if self.l1:
-            regularization += K.sum(self.l1 * K.abs(x_masked))
+            regularization += tf.reduce_sum(self.l1 * K.abs(x_masked))
         if self.l2:
-            regularization += K.sum(self.l2 * K.square(x_masked))
+            regularization += tf.reduce_sum(self.l2 * K.square(x_masked))
         return regularization
 
     def get_config(self):
@@ -610,8 +610,8 @@ def f1(y_true, y_pred):
         Computes the recall, a metric for multi-label classification of
         how many relevant items are selected.
         """
-        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-        possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+        true_positives = tf.reduce_sum(tf.round(tf.clip_by_value(y_true * y_pred, 0, 1)))
+        possible_positives = tf.reduce_sum(tf.round(tf.clip_by_value(y_true, 0, 1)))
         recall = true_positives / (possible_positives + K.epsilon())
         return recall
 
@@ -623,8 +623,8 @@ def f1(y_true, y_pred):
         Computes the precision, a metric for multi-label classification of
         how many selected items are relevant.
         """
-        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-        predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+        true_positives = tf.reduce_sum(tf.round(tf.clip_by_value(y_true * y_pred, 0, 1)))
+        predicted_positives = tf.reduce_sum(tf.round(tf.clip_by_value(y_pred, 0, 1)))
         precision = true_positives / (predicted_positives + K.epsilon())
         return precision
 

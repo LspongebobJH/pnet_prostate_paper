@@ -93,8 +93,8 @@ from keras import backend as K
 
 
 def r2_keras(y_true, y_pred):
-    SS_res = K.sum(K.square(y_true - y_pred))
-    SS_tot = K.sum(K.square(y_true - K.mean(y_true)))
+    SS_res = tf.reduce_sum(K.square(y_true - y_pred))
+    SS_tot = tf.reduce_sum(K.square(y_true - K.mean(y_true)))
     return (1 - SS_res / (SS_tot + K.epsilon()))
 
 
@@ -113,8 +113,8 @@ def correlation_coefficient(y_true, y_pred):
     mx = K.mean(x)
     my = K.mean(y)
     xm, ym = x - mx, y - my
-    r_num = K.sum(tf.multiply(xm, ym))
-    r_den = K.sqrt(tf.multiply(K.sum(K.square(xm)), K.sum(K.square(ym))))
+    r_num = tf.reduce_sum(tf.multiply(xm, ym))
+    r_den = K.sqrt(tf.multiply(tf.reduce_sum(K.square(xm)), tf.reduce_sum(K.square(ym))))
     r = r_num / r_den
 
     r = K.maximum(K.minimum(r, 1.0), -1.0)

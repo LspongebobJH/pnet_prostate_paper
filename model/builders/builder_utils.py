@@ -35,7 +35,7 @@ def get_similarity(similarity, params=None):
     '''
 
     dot = lambda a, b: K.batch_dot(a, b, axes=1)
-    l2_norm = lambda a, b: K.sqrt(K.sum(K.square(a - b), axis=1, keepdims=True))
+    l2_norm = lambda a, b: K.sqrt(tf.reduce_sum(K.square(a - b), axis=1, keepdims=True))
 
     if similarity == 'cosine':
         return lambda x: dot(x[0], x[1]) / K.maximum(K.sqrt(dot(x[0], x[0]) * dot(x[1], x[1])), K.epsilon())
@@ -67,16 +67,16 @@ def get_attention_model_shared(p1_encoded_f, flate=True):
 
     attention = Flatten()(weights1)
     # attention = Activation('softmax')(attention)
-    in_shape = p1_encoded_f._keras_shape
+    in_shape = p1_encoded_f.shape
     attention = RepeatVector(in_shape[-1])(attention)
     attention = Permute([2, 1])(attention)
 
     weighted1 = merge([p1_encoded_f, attention], mode='mul')
     # weighted1 = merge([p1_encoded_f, attention], mode='dot', dot_axes=1)
-    # weighted1= K.sum(weighted1, axis=1)
+    # weighted1= tf.reduce_sum(weighted1, axis=1)
 
     from keras.layers import Lambda
-    sum_dim1 = Lambda(lambda xin: K.sum(xin, axis=1), output_shape=(in_shape[-1],))
+    sum_dim1 = Lambda(lambda xin: tf.reduce_sum(xin, axis=1), output_shape=(in_shape[-1],))
     weighted1 = sum_dim1(weighted1)
     # if flate:
     #     flat = Flatten()
@@ -85,14 +85,14 @@ def get_attention_model_shared(p1_encoded_f, flate=True):
 
 
 def get_attention_model_not_shared(p1_encoded_f, flate=True):
-    print(('p1_encoded_f._keras_shape', p1_encoded_f._keras_shape))
+    print(('p1_encoded_f.shape', p1_encoded_f.shape))
     # weighted = Attention()(p1_encoded_f)
     weighted = AttLayer()(p1_encoded_f)
     return weighted
 
 
 def check_shape(p1_encoded_f):
-    shape = p1_encoded_f._keras_shape[1:]
+    shape = p1_encoded_f.shape[1:]
     if len(shape) < 2:
         shape = shape + (1,)
         p1_encoded_f = Reshape(shape)(p1_encoded_f)
@@ -106,14 +106,14 @@ def get_interaction_model(p1_encoded_f, p2_encoded_f=None, flate=True):
     p1_encoded_f = check_shape(p1_encoded_f)
     p2_encoded_f = check_shape(p2_encoded_f)
 
-    print(p1_encoded_f._keras_shape)
-    print(p2_encoded_f._keras_shape)
+    print(p1_encoded_f.shape)
+    print(p2_encoded_f.shape)
 
     match = merge([p1_encoded_f, p2_encoded_f], mode='dot', dot_axes=[2, 2])
 
     # if weighted:
     #     match = Flatten()(match)
-    #     shape = match._keras_shape[1:]
+    #     shape = match.shape[1:]
     #     shape = shape + (1,)
     #     print shape
     #     match = Reshape(shape)(match)
@@ -127,9 +127,9 @@ def get_interaction_model(p1_encoded_f, p2_encoded_f=None, flate=True):
 
 
 def apply_on_splits(model, p1_encoded_f, n_parts=2, name=''):
-    # n_samples, max_len, input_dim = p1_encoded_f._keras_shape
-    print('p1_encoded_f._keras_shape', p1_encoded_f._keras_shape)
-    n_samples, max_len = p1_encoded_f._keras_shape
+    # n_samples, max_len, input_dim = p1_encoded_f.shape
+    print('p1_encoded_f.shape', p1_encoded_f.shape)
+    n_samples, max_len = p1_encoded_f.shape
 
     step = max_len / n_parts
     xs1 = []
@@ -142,7 +142,7 @@ def apply_on_splits(model, p1_encoded_f, n_parts=2, name=''):
         x1 = split1(p1_encoded_f)
         x1 = model(x1)
 
-        # n_samples, n_features = x1._keras_shape
+        # n_samples, n_features = x1.shape
         # x1 = Reshape((1, n_features), input_shape=(n_features,))(x1)
         xs1.append(x1)
 
