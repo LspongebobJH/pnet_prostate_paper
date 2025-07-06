@@ -13,17 +13,17 @@ from model.layers_custom import Diagonal, SparseTF
 
 
 def get_map_from_layer(layer_dict):
-    pathways = layer_dict.keys()
-    print 'pathways', len(pathways)
-    genes = list(itertools.chain.from_iterable(layer_dict.values()))
+    pathways = list(layer_dict.keys())
+    print('pathways', len(pathways))
+    genes = list(itertools.chain.from_iterable(list(layer_dict.values())))
     genes = list(np.unique(genes))
-    print 'genes', len(genes)
+    print('genes', len(genes))
 
     n_pathways = len(pathways)
     n_genes = len(genes)
 
     mat = np.zeros((n_pathways, n_genes))
-    for p, gs in layer_dict.items():
+    for p, gs in list(layer_dict.items()):
         g_inds = [genes.index(g) for g in gs]
         p_ind = pathways.index(p)
         mat[p_ind, g_inds] = 1
@@ -41,13 +41,13 @@ def get_layer_maps(genes, n_levels, direction, add_unk_genes):
     filtering_index = genes
     maps = []
     for i, layer in enumerate(reactome_layers[::-1]):
-        print 'layer #', i
+        print('layer #', i)
         mapp = get_map_from_layer(layer)
         filter_df = pd.DataFrame(index=filtering_index)
-        print 'filtered_map', filter_df.shape
+        print('filtered_map', filter_df.shape)
         filtered_map = filter_df.merge(mapp, right_index=True, left_index=True, how='left')
         # filtered_map = filter_df.merge(mapp, right_index=True, left_index=True, how='inner')
-        print 'filtered_map', filter_df.shape
+        print('filtered_map', filter_df.shape)
         # filtered_map = filter_df.merge(mapp, right_index=True, left_index=True, how='inner')
 
         # UNK, add a node for genes without known reactome annotation
@@ -59,7 +59,7 @@ def get_layer_maps(genes, n_levels, direction, add_unk_genes):
         ####
 
         filtered_map = filtered_map.fillna(0)
-        print 'filtered_map', filter_df.shape
+        print('filtered_map', filter_df.shape)
         # filtering_index = list(filtered_map.columns)
         filtering_index = filtered_map.columns
         logging.info('layer {} , # of edges  {}'.format(i, filtered_map.sum().sum()))
@@ -114,35 +114,35 @@ def get_pnet(inputs, features, genes, n_hidden_layers, direction, activation, ac
             ones_ratio = float(n_features) / np.prod([n_genes, n_features])
             logging.info('ones_ratio random {}'.format(ones_ratio))
             mapp = np.random.choice([0, 1], size=[n_features, n_genes], p=[1 - ones_ratio, ones_ratio])
-            layer1 = SparseTF(n_genes, mapp, activation=activation, W_regularizer=reg_l(w_reg0),
+            layer1 = SparseTF(n_genes, mapp, activation=activation, kernel_regularizer=reg_l(w_reg0),
                               name='h{}'.format(0), kernel_initializer=kernel_initializer, use_bias=use_bias,
                               **constraints)
-            # layer1 = Diagonal(n_genes, input_shape=(n_features,), activation=activation, W_regularizer=l2(w_reg),
+            # layer1 = Diagonal(n_genes, input_shape=(n_features,), activation=activation, kernel_regularizer=l2(w_reg),
             #           use_bias=use_bias, name='h0', kernel_initializer= kernel_initializer )
         else:
-            layer1 = Diagonal(n_genes, input_shape=(n_features,), activation=activation, W_regularizer=l2(w_reg0),
+            layer1 = Diagonal(n_genes, input_shape=(n_features,), activation=activation, kernel_regularizer=l2(w_reg0),
                               use_bias=use_bias, name='h0', kernel_initializer=kernel_initializer, **constraints)
 
 
     else:
         if sparse_first_layer:
             #
-            layer1 = Diagonal(n_genes, input_shape=(n_features,), activation=activation, W_regularizer=l2(w_reg0),
+            layer1 = Diagonal(n_genes, input_shape=(n_features,), activation=activation, kernel_regularizer=l2(w_reg0),
                               use_bias=use_bias, name='h0', kernel_initializer=kernel_initializer, **constraints)
         else:
-            layer1 = Dense(n_genes, input_shape=(n_features,), activation=activation, W_regularizer=l2(w_reg0),
+            layer1 = Dense(n_genes, input_shape=(n_features,), activation=activation, kernel_regularizer=l2(w_reg0),
                            use_bias=use_bias, name='h0', kernel_initializer=kernel_initializer)
     outcome = layer1(inputs)
     if attention:
-        attention_probs = Diagonal(n_genes, input_shape=(n_features,), activation='sigmoid', W_regularizer=l2(w_reg0),
+        attention_probs = Diagonal(n_genes, input_shape=(n_features,), activation='sigmoid', kernel_regularizer=l2(w_reg0),
                                    name='attention0')(inputs)
         outcome = multiply([outcome, attention_probs], name='attention_mul')
 
     decision_outcomes = []
 
     # if reg_outcomes:
-    # decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(0), W_regularizer=reg_l(w_reg_outcome0), **constraints)(inputs)
-    decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(0), W_regularizer=reg_l(w_reg_outcome0))(
+    # decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(0), kernel_regularizer=reg_l(w_reg_outcome0), **constraints)(inputs)
+    decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(0), kernel_regularizer=reg_l(w_reg_outcome0))(
         inputs)
     # else:
     #     decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(0))(inputs)
@@ -157,9 +157,9 @@ def get_pnet(inputs, features, genes, n_hidden_layers, direction, activation, ac
     # decision_outcomes.append(decision_outcome)
 
     # if reg_outcomes:
-    # decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(1), W_regularizer=reg_l(w_reg_outcome1/2.), **constraints)(outcome)
+    # decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(1), kernel_regularizer=reg_l(w_reg_outcome1/2.), **constraints)(outcome)
     decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(1),
-                             W_regularizer=reg_l(w_reg_outcome1 / 2.))(outcome)
+                             kernel_regularizer=reg_l(w_reg_outcome1 / 2.))(outcome)
     # else:
     #     decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(1))(outcome)
 
@@ -177,7 +177,7 @@ def get_pnet(inputs, features, genes, n_hidden_layers, direction, activation, ac
 
     if n_hidden_layers > 0:
         maps = get_layer_maps(genes, n_hidden_layers, direction, add_unk_genes)
-        layer_inds = range(1, len(maps))
+        layer_inds = list(range(1, len(maps)))
         # if adaptive_reg:
         #     w_regs = [float(w_reg)/float(i) for i in layer_inds]
         # else:
@@ -186,8 +186,8 @@ def get_pnet(inputs, features, genes, n_hidden_layers, direction, activation, ac
         #     dropouts = [float(dropout)/float(i) for i in layer_inds]
         # else:
         #     dropouts = [dropout]*len(maps)
-        print 'original dropout', dropout
-        print 'dropout', layer_inds, dropout, w_reg
+        print('original dropout', dropout)
+        print('dropout', layer_inds, dropout, w_reg)
         w_regs = w_reg[1:]
         w_reg_outcomes = w_reg_outcomes[1:]
         dropouts = dropout[1:]
@@ -204,28 +204,28 @@ def get_pnet(inputs, features, genes, n_hidden_layers, direction, activation, ac
             n_genes, n_pathways = mapp.shape
             logging.info('n_genes, n_pathways {} {} '.format(n_genes, n_pathways))
             # print 'map # ones {}'.format(np.sum(mapp))
-            print 'layer {}, dropout  {} w_reg {}'.format(i, dropout, w_reg)
+            print('layer {}, dropout  {} w_reg {}'.format(i, dropout, w_reg))
             layer_name = 'h{}'.format(i + 1)
             if sparse:
-                hidden_layer = SparseTF(n_pathways, mapp, activation=activation, W_regularizer=reg_l(w_reg),
+                hidden_layer = SparseTF(n_pathways, mapp, activation=activation, kernel_regularizer=reg_l(w_reg),
                                         name=layer_name, kernel_initializer=kernel_initializer,
                                         use_bias=use_bias, **constraints)
             else:
-                hidden_layer = Dense(n_pathways, activation=activation, W_regularizer=reg_l(w_reg),
+                hidden_layer = Dense(n_pathways, activation=activation, kernel_regularizer=reg_l(w_reg),
                                      name=layer_name, kernel_initializer=kernel_initializer, **constraints)
 
             outcome = hidden_layer(outcome)
 
             if attention:
                 attention_probs = Dense(n_pathways, activation='sigmoid', name='attention{}'.format(i + 1),
-                                        W_regularizer=l2(w_reg))(outcome)
+                                        kernel_regularizer=l2(w_reg))(outcome)
                 outcome = multiply([outcome, attention_probs], name='attention_mul{}'.format(i + 1))
 
             # if reg_outcomes:
-            # decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(i + 2), W_regularizer=reg_l( w_reg2/(2**i)))(outcome)
-            # decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(i + 2), W_regularizer=reg_l( w_reg_outcome), **constraints)(outcome)
+            # decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(i + 2), kernel_regularizer=reg_l( w_reg2/(2**i)))(outcome)
+            # decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(i + 2), kernel_regularizer=reg_l( w_reg_outcome), **constraints)(outcome)
             decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(i + 2),
-                                     W_regularizer=reg_l(w_reg_outcome))(outcome)
+                                     kernel_regularizer=reg_l(w_reg_outcome))(outcome)
             # else:
             #     decision_outcome = Dense(1, activation='linear', name='o_linear{}'.format(i + 2))(outcome)
             # testing

@@ -37,7 +37,7 @@ def plot_stability(model_name, n_features):
     for f in n_features:
         stability_index = get_stability_index(df, f)
         stability_indeces.append(stability_index)
-        print f, stability_index
+        print(f, stability_index)
 
     plt.plot(n_features, stability_indeces, '*-')
     plt.ylabel('stability index', fontsize=fontsize)
@@ -64,7 +64,7 @@ fig = plt.figure()
 fig.set_size_inches(6, 4)
 fontsize = 12
 for m in files:
-    print m
+    print(m)
     plot_stability(m, n_features)
 
 plt.legend([m.replace('.csv', '') for m in models], fontsize=fontsize)

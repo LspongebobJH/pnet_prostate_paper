@@ -6,6 +6,10 @@
 !*.py
 !*/
 !*.ipynb
+!*.bak
+!pyproject.toml
+!uv.lock
+!.python-version
 _testing/
 _test/
 logs/

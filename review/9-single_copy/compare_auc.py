@@ -18,8 +18,8 @@ def read_predictions(dirs_df):
         model = row.Model
         prediction_file = join(dir_, 'P-net_ALL_testing.csv')
         pred_df = pd.read_csv(prediction_file)
-        print(pred_df.shape)
-        print(pred_df.head())
+        print((pred_df.shape))
+        print((pred_df.head()))
         model_dict[model] = pred_df
     return model_dict
 
@@ -35,14 +35,14 @@ def read_feature_ranks(dirs_df):
         # prediction_file = [join(dir_,f) for f in listdir(dir_) if '0_testing.csv' in f][0]
         prediction_file = join(dir_, 'fs/P-net_ALL_testing.csv')
         pred_df = pd.read_csv(prediction_file)
-        print(pred_df.shape)
-        print(pred_df.head())
+        print((pred_df.shape))
+        print((pred_df.head()))
         model_dict[model] = pred_df
     return model_dict
 
 
 def plot_auc_bootstrap(all_models_dict, ax):
-    n = len(all_models_dict.keys())
+    n = len(list(all_models_dict.keys()))
     colors = sns.color_palette(None, n)
 
     all_scores = []
@@ -92,21 +92,21 @@ def sort_dict(all_models_dict):
         average_auc = metrics.auc(fpr, tpr)
         # average_auc = average_precision_score(y_test, y_pred_score)
         sorted_dict[k] = average_auc
-        print('model {} , auc= {}'.format(k, average_auc))
+        print(('model {} , auc= {}'.format(k, average_auc)))
 
-    sorted_dict = sorted(sorted_dict.items(), key=lambda kv: kv[1], reverse=True)
+    sorted_dict = sorted(list(sorted_dict.items()), key=lambda kv: kv[1], reverse=True)
     sorted_dict = collections.OrderedDict(sorted_dict)
     return sorted_dict
 
 
 def plot_auc_all(all_models_dict, ax):
     # sort based on area under prc
-    n = len(all_models_dict.keys())
+    n = len(list(all_models_dict.keys()))
     colors = sns.color_palette(None, n)
 
     sorted_dict = sort_dict(all_models_dict)
     for i, k in enumerate(sorted_dict.keys()):
-        print('model {} , auc= {}'.format(k, sorted_dict[k]))
+        print(('model {} , auc= {}'.format(k, sorted_dict[k])))
         df = all_models_dict[k]
         y_test = df['y']
         y_pred_score = df['pred_scores']
@@ -124,7 +124,7 @@ files.append(
 files.append(dict(Model='two copies', file=join(base_dir_two_copies, 'onsplit_average_reg_10_tanh_large_testing')))
 dirs_df = pd.DataFrame(files)
 
-print dirs_df
+print(dirs_df)
 model_dict = read_predictions(dirs_df)
 saving_dir = join(PLOTS_PATH, 'reviews/9-single_copy')
 

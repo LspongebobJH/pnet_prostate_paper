@@ -58,7 +58,7 @@ def load_data(filename, selected_genes=None):
     genes = all.columns
 
     if not selected_genes is None:
-        intersect = set.intersection(set(genes), selected_genes)
+        intersect = list(set(genes).intersection(set(selected_genes)))
         if len(intersect) < len(selected_genes):
             # raise Exception('wrong gene')
             logging.warning('some genes dont exist in the original data set')

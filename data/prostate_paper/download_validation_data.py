@@ -1,5 +1,5 @@
 import os
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from os.path import join, basename, dirname, exists
 
 current_dir = dirname(__file__)
@@ -29,10 +29,10 @@ def download_data_MET500():
     links = [file1, file2, file3]
 
     for link in links:
-        print ('downloading file {}'.format(link))
+        print(('downloading file {}'.format(link)))
         filename = join(saving_dir, basename(link))
         with open(filename, 'wb') as f:
-            f.write(urllib2.urlopen(link).read())
+            f.write(urllib.request.urlopen(link).read())
             f.close()
 
 
@@ -43,10 +43,10 @@ def download_data_PRAD():
     file2 = 'https://static-content.springer.com/esm/art%3A10.1038%2Fnature20788/MediaObjects/41586_2017_BFnature20788_MOESM325_ESM.zip'
     links = [file1, file2]
     for link in links:
-        print ('downloading file {}'.format(link))
+        print(('downloading file {}'.format(link)))
         filename = join(data_dir, basename(link))
         with open(filename, 'wb') as f:
-            f.write(urllib2.urlopen(link).read())
+            f.write(urllib.request.urlopen(link).read())
             f.close()
 
 

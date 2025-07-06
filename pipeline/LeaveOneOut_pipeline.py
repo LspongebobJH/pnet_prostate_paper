@@ -90,7 +90,7 @@ class LeaveOneOutPipeline(OneSplitPipeline):
         logging.info('model_params: {}'.format(model_params))
         splitter = LeaveOneOut()
         folds = list(splitter.split(X, y.ravel()))
-        fold_ids = range(len(folds))
+        fold_ids = list(range(len(folds)))
         model = get_model(model_params)
         f = partial(eval_model, model, X, y, info, folds, self.directory, model_name)
         p = mp.Pool(5)
@@ -118,7 +118,7 @@ def predict(model, x_test):
 
 
 def eval_model(empty_model, X, y, info, folds, saving_dir, model_name, fold_id):
-    print('fold # {}'.format(fold_id))
+    print(('fold # {}'.format(fold_id)))
     train_index, test_index = folds[fold_id]
     model = deepcopy(empty_model)
     x_train, x_test = X[train_index], X[test_index]

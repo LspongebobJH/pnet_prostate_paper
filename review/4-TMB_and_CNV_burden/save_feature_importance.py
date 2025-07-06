@@ -38,9 +38,9 @@ def save_link_weights(link_weights_df, layers):
 
 
 def save_activation(layer_outs_dict, feature_names, info):
-    for l_name, l_outut in sorted(layer_outs_dict.iteritems()):
+    for l_name, l_outut in sorted(layer_outs_dict.items()):
         if l_name.startswith('h'):
-            print l_name, l_outut.shape
+            print(l_name, l_outut.shape)
             l = int(l_name[1:])
             features = feature_names[l_name]
             layer_output_df = pd.DataFrame(l_outut, index=info, columns=features)
@@ -61,7 +61,7 @@ def save_graph_stats(degrees, fan_outs, fan_ins, layers):
     for i, (d, fin, fout) in enumerate(zip(degrees[1:], fan_ins, fan_outs[1:])):
         df = pd.concat([d, fin, fout], axis=1)
         df.columns = ['degree', 'fan_in', 'fan_out']
-        print df.head()
+        print(df.head())
         filename = join(saving_dir, 'graph_stats_{}.csv'.format(i + 2))
         df.to_csv(filename)
 
@@ -100,14 +100,14 @@ def get_degrees(maps, layers):
         fan_in2 = layer2.abs().sum(axis=0)
 
         if i == 0:
-            print i
+            print(i)
             l = layers[0]
             df = pd.concat([fan_out1, fan_out1], keys=['degree', 'fanout'], axis=1)
             df['fanin'] = 1.
             stats[l] = df
 
-        print '{}- layer {} :fan-in {}, fan-out {}'.format(i, l1, fan_in1.shape, fan_out2.shape)
-        print '{}- layer {} :fan-in {}, fan-out {}'.format(i, l1, fan_in2.shape, fan_out1.shape)
+        print('{}- layer {} :fan-in {}, fan-out {}'.format(i, l1, fan_in1.shape, fan_out2.shape))
+        print('{}- layer {} :fan-in {}, fan-out {}'.format(i, l1, fan_in2.shape, fan_out1.shape))
 
         df = pd.concat([fan_in1, fan_out2], keys=['fanin', 'fanout'], axis=1)
         df['degree'] = df['fanin'] + df['fanout']
@@ -126,11 +126,11 @@ def run():
     feature_names = nn_model.feature_names
     X, Y, info = get_data(loader, use_data, dropAR)
     response = pd.DataFrame(Y, index=info, columns=['response'])
-    print response.head()
+    print(response.head())
     filename = join(saving_dir, 'response.csv')
     response.to_csv(filename)
 
-    print 'saving gradeint importance'
+    print('saving gradeint importance')
     # #gradeint importance --------------------
     node_weights_, node_weights_samples_dfs = get_node_importance(nn_model, X, Y, importance_type[0], target)
     save_gradient_importance(node_weights_, node_weights_samples_dfs, info)

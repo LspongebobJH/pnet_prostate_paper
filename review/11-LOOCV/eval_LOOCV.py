@@ -21,7 +21,7 @@ if not os.path.exists(saving_dir):
 
 
 def plot_bootstrap(all_models_dict, ax, score_fun=metrics.roc_auc_score):
-    n = len(all_models_dict.keys())
+    n = len(list(all_models_dict.keys()))
     import seaborn as sns
     colors = sns.color_palette(None, n)
 
@@ -71,8 +71,8 @@ ret_pnet = evalualte(y_test=df.y_test, y_pred=df.y_pred_test, y_pred_score=df.y_
 df = df_logistic
 ret_logistic = evalualte(y_test=df.y_test, y_pred=df.y_pred_test, y_pred_score=df.y_pred_test_scores)
 
-print ret_pnet
-print ret_logistic
+print(ret_pnet)
+print(ret_logistic)
 
 fig = plt.figure()
 df = df_pnet

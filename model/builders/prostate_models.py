@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 from keras import Input
-from keras.engine import Model
+from keras.models import Model
 from keras.layers import Dense, Dropout, Lambda, Concatenate
 from keras.regularizers import l2
 
@@ -17,14 +17,14 @@ from model.model_utils import print_model, get_layers
 def build_pnet(optimizer, w_reg, add_unk_genes=True, sparse=True, dropout=0.5, use_bias=False, activation='tanh',
                loss='binary_crossentropy', data_params=None, n_hidden_layers=1, direction='root_to_leaf',
                batch_normal=False, kernel_initializer='glorot_uniform', shuffle_genes=False, reg_outcomes=False):
-    print data_params
-    print 'n_hidden_layers', n_hidden_layers
+    print(data_params)
+    print('n_hidden_layers', n_hidden_layers)
     data = Data(**data_params)
     x, y, info, cols = data.get_data()
-    print x.shape
-    print y.shape
-    print info.shape
-    print cols.shape
+    print(x.shape)
+    print(y.shape)
+    print(info.shape)
+    print(cols.shape)
     # features = cols.tolist()
     features = cols
     if loss == 'binary_crossentropy':
@@ -46,7 +46,7 @@ def build_pnet(optimizer, w_reg, add_unk_genes=True, sparse=True, dropout=0.5, u
 
     # n_genes = len(genes)
     # genes = list(genes)
-    # layer1 = Diagonal(n_genes, input_shape=(n_features,), activation=activation, W_regularizer=l2(w_reg), use_bias=False, name='h0')
+    # layer1 = Diagonal(n_genes, input_shape=(n_features,), activation=activation, kernel_regularizer=l2(w_reg), use_bias=False, name='h0')
     # layer1 = SpraseLayer(n_genes, input_shape=(n_features,), activation=activation,  use_bias=False,name='h0')
     # layer1 = Dense(n_genes, input_shape=(n_features,), activation=activation, name='h0')
     ins = Input(shape=(n_features,), dtype='float32', name='inputs')
@@ -86,19 +86,19 @@ def build_pnet(optimizer, w_reg, add_unk_genes=True, sparse=True, dropout=0.5, u
 
     # n_outputs = n_hidden_layers + 2
     n_outputs = len(decision_outcomes)
-    loss_weights = range(1, n_outputs + 1)
+    loss_weights = list(range(1, n_outputs + 1))
     # loss_weights = [l*l for l in loss_weights]
     loss_weights = [np.exp(l) for l in loss_weights]
     # loss_weights = [l*np.exp(l) for l in loss_weights]
     # loss_weights=1
-    print 'loss_weights', loss_weights
+    print('loss_weights', loss_weights)
     model.compile(optimizer=optimizer,
                   loss=['binary_crossentropy'] * n_outputs, metrics=[f1], loss_weights=loss_weights)
     # loss=['binary_crossentropy']*(n_hidden_layers +2))
     logging.info('done compiling')
 
     print_model(model)
-    print get_layers(model)
+    print(get_layers(model))
     logging.info(model.summary())
     logging.info('# of trainable params of the model is %s' % model.count_params())
     return model, feature_names
@@ -109,14 +109,14 @@ def build_pnet2(optimizer, w_reg, w_reg_outcomes, add_unk_genes=True, sparse=Tru
                 use_bias=False, activation='tanh', loss='binary_crossentropy', data_params=None, n_hidden_layers=1,
                 direction='root_to_leaf', batch_normal=False, kernel_initializer='glorot_uniform', shuffle_genes=False,
                 attention=False, dropout_testing=False, non_neg=False, repeated_outcomes=True, sparse_first_layer=True):
-    print data_params
-    print 'n_hidden_layers', n_hidden_layers
+    print(data_params)
+    print('n_hidden_layers', n_hidden_layers)
     data = Data(**data_params)
     x, y, info, cols = data.get_data()
-    print x.shape
-    print y.shape
-    print info.shape
-    print cols.shape
+    print(x.shape)
+    print(y.shape)
+    print(info.shape)
+    print(cols.shape)
     features = cols
     if loss == 'binary_crossentropy':
         activation_decision = 'sigmoid'
@@ -168,7 +168,7 @@ def build_pnet2(optimizer, w_reg, w_reg_outcomes, add_unk_genes=True, sparse=Tru
     else:
         outcome = decision_outcomes[-1]
 
-    model = Model(input=[ins], output=outcome)
+    model = Model(inputs=[ins], outputs=outcome)
 
     if type(outcome) == list:
         n_outputs = len(outcome)
@@ -180,14 +180,14 @@ def build_pnet2(optimizer, w_reg, w_reg_outcomes, add_unk_genes=True, sparse=Tru
     else:
         loss_weights = [loss_weights] * n_outputs
 
-    print 'loss_weights', loss_weights
+    print('loss_weights', loss_weights)
     model.compile(optimizer=optimizer,
                   loss=['binary_crossentropy'] * n_outputs, metrics=[f1], loss_weights=loss_weights)
 
     logging.info('done compiling')
 
     print_model(model)
-    print get_layers(model)
+    print(get_layers(model))
     logging.info(model.summary())
     logging.info('# of trainable params of the model is %s' % model.count_params())
     return model, feature_names
@@ -205,10 +205,10 @@ def get_clinical_netowrk(ins, n_features, n_hids, activation):
     layers = []
     for i, n in enumerate(n_hids):
         if i == 0:
-            layer = Dense(n, input_shape=(n_features,), activation=activation, W_regularizer=l2(0.001),
+            layer = Dense(n, input_shape=(n_features,), activation=activation, kernel_regularizer=l2(0.001),
                           name='h_clinical' + str(i))
         else:
-            layer = Dense(n, activation=activation, W_regularizer=l2(0.001), name='h_clinical' + str(i))
+            layer = Dense(n, activation=activation, kernel_regularizer=l2(0.001), name='h_clinical' + str(i))
 
         layers.append(layer)
         drop = 0.5
@@ -229,7 +229,7 @@ def build_pnet2_account_for(optimizer, w_reg, w_reg_outcomes, add_unk_genes=True
                             shuffle_genes=False,
                             attention=False, dropout_testing=False, non_neg=False, repeated_outcomes=True,
                             sparse_first_layer=True):
-    print data_params
+    print(data_params)
 
     data = Data(**data_params)
     x, y, info, cols = data.get_data()
@@ -238,7 +238,7 @@ def build_pnet2_account_for(optimizer, w_reg, w_reg_outcomes, add_unk_genes=True
 
     import pandas as pd
     x_df = pd.DataFrame(x, columns=cols, index=info)
-    genomics_label = list(x_df.columns.levels[0]).index(u'genomics')
+    genomics_label = list(x_df.columns.levels[0]).index('genomics')
     genomics_ind = x_df.columns.labels[0] == genomics_label
     genomics = x_df['genomics']
     features_genomics = genomics.columns.remove_unused_levels()
@@ -259,8 +259,8 @@ def build_pnet2_account_for(optimizer, w_reg, w_reg_outcomes, add_unk_genes=True
     else:
         genes = features_genomics
 
-    print "n_features", n_features, "n_features_genomics", n_features_genomics
-    print "genes", len(genes), genes
+    print("n_features", n_features, "n_features_genomics", n_features_genomics)
+    print("genes", len(genes), genes)
 
     ins = Input(shape=(n_features,), dtype='float32', name='inputs')
 
@@ -320,27 +320,27 @@ def build_pnet2_account_for(optimizer, w_reg, w_reg_outcomes, add_unk_genes=True
     else:
         loss_weights = [loss_weights] * n_outputs
 
-    print 'loss_weights', loss_weights
+    print('loss_weights', loss_weights)
     model.compile(optimizer=optimizer,
                   loss=['binary_crossentropy'] * n_outputs, metrics=[f1], loss_weights=loss_weights)
     logging.info('done compiling')
 
     print_model(model)
-    print get_layers(model)
+    print(get_layers(model))
     logging.info(model.summary())
     logging.info('# of trainable params of the model is %s' % model.count_params())
     return model, feature_names
 
 
 def build_dense(optimizer, n_weights, w_reg, activation='tanh', loss='binary_crossentropy', data_params=None):
-    print data_params
+    print(data_params)
 
     data = Data(**data_params)
     x, y, info, cols = data.get_data()
-    print x.shape
-    print y.shape
-    print info.shape
-    print cols.shape
+    print(x.shape)
+    print(y.shape)
+    print(info.shape)
+    print(cols.shape)
     # features = cols.tolist()
     features = cols
     if loss == 'binary_crossentropy':
@@ -357,8 +357,8 @@ def build_dense(optimizer, n_weights, w_reg, activation='tanh', loss='binary_cro
 
     ins = Input(shape=(n_features,), dtype='float32', name='inputs')
     n = np.ceil(float(n_weights) / float(n_features))
-    print n
-    layer1 = Dense(units=int(n), activation=activation, W_regularizer=l2(w_reg), name='h0')
+    print(n)
+    layer1 = Dense(units=int(n), activation=activation, kernel_regularizer=l2(w_reg), name='h0')
     outcome = layer1(ins)
     outcome = Dense(1, activation=activation_decision, name='output')(outcome)
     model = Model(input=[ins], output=outcome)
@@ -368,7 +368,7 @@ def build_dense(optimizer, n_weights, w_reg, activation='tanh', loss='binary_cro
     logging.info('done compiling')
 
     print_model(model)
-    print get_layers(model)
+    print(get_layers(model))
     logging.info(model.summary())
     logging.info('# of trainable params of the model is %s' % model.count_params())
     return model, feature_names
@@ -376,13 +376,13 @@ def build_dense(optimizer, n_weights, w_reg, activation='tanh', loss='binary_cro
 
 def build_pnet_KEGG(optimizer, w_reg, dropout=0.5, activation='tanh', use_bias=False,
                     kernel_initializer='glorot_uniform', data_params=None, arch=''):
-    print data_params
+    print(data_params)
     data = Data(**data_params)
     x, y, info, cols = data.get_data()
-    print x.shape
-    print y.shape
-    print info.shape
-    print cols.shape
+    print(x.shape)
+    print(y.shape)
+    print(info.shape)
+    print(cols.shape)
 
     logging.info('x shape {} , y shape {} info {} genes {}'.format(x.shape, y.shape, info.shape, cols.shape))
     feature_names = {}
@@ -401,7 +401,7 @@ def build_pnet_KEGG(optimizer, w_reg, dropout=0.5, activation='tanh', use_bias=F
     n_genes = len(genes)
     genes = list(genes)
 
-    layer1 = Diagonal(n_genes, input_shape=(n_features,), activation=activation, W_regularizer=l2(w_reg),
+    layer1 = Diagonal(n_genes, input_shape=(n_features,), activation=activation, kernel_regularizer=l2(w_reg),
                       use_bias=use_bias, name='h0', kernel_initializer=kernel_initializer)
 
     ins = Input(shape=(n_features,), dtype='float32', name='inputs')
@@ -418,11 +418,11 @@ def build_pnet_KEGG(optimizer, w_reg, dropout=0.5, activation='tanh', use_bias=F
     n_genes, n_pathways = mapp.shape
     logging.info('n_genes, n_pathways {} {} '.format(n_genes, n_pathways))
 
-    hidden_layer = SparseTF(n_pathways, mapp, activation=activation, W_regularizer=l2(w_reg),
+    hidden_layer = SparseTF(n_pathways, mapp, activation=activation, kernel_regularizer=l2(w_reg),
                             name='h1', kernel_initializer=kernel_initializer,
                             use_bias=use_bias)
 
-    # hidden_layer = Dense(n_pathways, activation=activation, W_regularizer=L1L2_with_map(mapp, w_reg, w_reg),
+    # hidden_layer = Dense(n_pathways, activation=activation, kernel_regularizer=L1L2_with_map(mapp, w_reg, w_reg),
     #                      kernel_constraint=ConnectionConstaints(mapp), use_bias=False,
     #                      name='h1')
 
@@ -442,7 +442,7 @@ def build_pnet_KEGG(optimizer, w_reg, dropout=0.5, activation='tanh', use_bias=F
     logging.info('done compiling')
 
     print_model(model)
-    print get_layers(model)
+    print(get_layers(model))
     logging.info(model.summary())
     logging.info('# of trainable params of the model is %s' % model.count_params())
     return model, feature_names

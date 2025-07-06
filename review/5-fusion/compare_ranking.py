@@ -60,12 +60,12 @@ for l in layers:
     w, p = wilcoxon(fusion, base)
     wilcoxon_fusion_list.append((w, p))
 
-print 'Fusion'
+print('Fusion')
 for w in wilcoxon_fusion_list:
-    print w
-print 'Fusion (genes)'
+    print(w)
+print('Fusion (genes)')
 for w in wilcoxon_fusion_genes_list:
-    print w
+    print(w)
 
 n = 20
 common_list = []
@@ -88,7 +88,7 @@ plt.ylim(0, 100)
 plt.ylabel('Percent of common nodes (%)')
 plt.xlabel('Layers')
 plt.legend(['Fusion', 'Fusion (genes)'])
-plt.xticks(range(len(layers)), layers)
+plt.xticks(list(range(len(layers))), layers)
 
 current_dir = basename(dirname(__file__))
 saving_dir = join(PLOTS_PATH, 'reviews/{}'.format(current_dir))

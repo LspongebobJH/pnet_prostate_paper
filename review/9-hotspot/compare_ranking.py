@@ -58,7 +58,7 @@ for l in layers:
 # plt.plot(wilcoxon_list)
 
 for w in wilcoxon_list:
-    print w
+    print(w)
 
 n = 20
 common_list = []
@@ -67,14 +67,14 @@ for l in layers:
     top10_hotspot = ranked['Mutations with Hotspot adjusted'].nsmallest(n).index
     top10 = ranked['All mutations'].nsmallest(n).index
     c = len(set(top10_hotspot).intersection(top10))
-    print c
+    print(c)
     common_list.append(c / float(n))
 
 plt.plot(common_list, '-.')
 plt.ylim(0, 1)
 plt.ylabel('Percent of common nodes')
 plt.xlabel('Layers')
-plt.xticks(range(len(layers)), layers)
+plt.xticks(list(range(len(layers))), layers)
 
 current_dir = basename(dirname(__file__))
 saving_dir = join(PLOTS_PATH, 'reviews/{}'.format(current_dir))

@@ -31,7 +31,7 @@ ax = plt.subplot()
 
 col = 'coef_abs'
 importance = coef_df.sort_values(col, ascending=False)
-importance['rank'] = range(1, len(importance) + 1)
+importance['rank'] = list(range(1, len(importance) + 1))
 importance_log = np.log(importance[col].values + 1)
 
 plt.plot(importance_log, ".")

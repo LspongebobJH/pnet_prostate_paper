@@ -19,7 +19,7 @@ high_nodes = node_importance[node_importance.layer == l]
 col = 'coef'
 
 importance = high_nodes.sort_values(col, ascending=False)
-importance['rank'] = range(1, len(importance) + 1)
+importance['rank'] = list(range(1, len(importance) + 1))
 importance_log = np.log(importance[col].values + 1)
 
 interesting = ['FOXA1', 'SPOP', 'MED12', 'CDK12', 'PIK3CA', 'CHD1', 'ZBTB7B']
@@ -35,7 +35,7 @@ for i, gene in enumerate(annotations.index):
     x = annotations.loc[gene, 'rank']
     y = annotations.loc[gene, col]
     connectivity = annotations.loc[gene, 'coef_graph']
-    print('gene {}, rank {}, importance,  {},  connectivity {}'.format(gene, x, y, connectivity))
+    print(('gene {}, rank {}, importance,  {},  connectivity {}'.format(gene, x, y, connectivity)))
 
     ax.annotate(gene, (x, y),
                 xycoords='data',

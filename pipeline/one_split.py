@@ -74,7 +74,7 @@ class OneSplitPipeline:
         else:
             file_name = join(self.directory, model_name + '_testing.csv')
         logging.info("saving results : %s" % file_name)
-        print('info', info)
+        print(('info', info))
         info = pd.DataFrame(index=info)
         info['pred'] = y_pred
         info['pred_scores'] = y_pred_scores
@@ -125,9 +125,9 @@ class OneSplitPipeline:
         y_test_list = []
         fig = plt.figure()
         fig.set_size_inches((10, 6))
-        print self.data_params
+        print(self.data_params)
         for data_params in self.data_params:
-            print 'data_params', data_params
+            print('data_params', data_params)
             data_id = data_params['id']
             logging.info('loading data....')
             data = Data(**data_params)
@@ -246,7 +246,7 @@ class OneSplitPipeline:
                         if type(c) == pd.DataFrame:
                             c.to_csv(file_name + '_layer' + str(i) + '.csv')
                 elif type(coef) == dict:
-                    for c in coef.keys():
+                    for c in list(coef.keys()):
                         if type(coef[c]) == pd.DataFrame:
                             coef[c].to_csv(file_name + '_layer' + str(c) + '.csv')
 
@@ -296,7 +296,7 @@ class OneSplitPipeline:
         else:
             y_pred_test_scores = y_pred_test
 
-        print 'y_pred_test', y_pred_test.shape, y_pred_test_scores.shape
+        print('y_pred_test', y_pred_test.shape, y_pred_test_scores.shape)
         return y_pred_test, y_pred_test_scores
 
     def preprocess(self, x_train, x_test):

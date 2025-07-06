@@ -24,7 +24,7 @@ def get_node_colors(all_node_labels):
         colors[-1] = 0.7  # set alpha
         # c = color_to_hex(c)
         c = 'rgba{}'.format(tuple(colors))
-        print c
+        print(c)
         node_colors[node] = c
 
     return node_colors
@@ -35,7 +35,7 @@ def encode_nodes(df):
     target = df['target']
     all_node_labels = list(np.unique(np.concatenate([source, target])))
     n_nodes = len(all_node_labels)
-    df_encoded = df.replace(all_node_labels, range(n_nodes))
+    df_encoded = df.replace(all_node_labels, list(range(n_nodes)))
     return df_encoded, all_node_labels
 
 
@@ -56,9 +56,9 @@ def get_nodes_per_layer_filtered(nodes_per_layer_df, all_node_ids, all_node_labe
     nodes_per_layer_filtered_df = nodes_per_layer_df.join(all_node_ids_df, how='right')
     nodes_per_layer_filtered_df = nodes_per_layer_filtered_df.fillna(0)
     nodes_per_layer_filtered_df = nodes_per_layer_filtered_df.groupby(nodes_per_layer_filtered_df.index).min()
-    mapping_dict = dict(zip(all_node_ids, all_node_labels))
+    mapping_dict = dict(list(zip(all_node_ids, all_node_labels)))
     nodes_per_layer_filtered_df.index = nodes_per_layer_filtered_df.index.map(lambda x: mapping_dict[x])
-    mapping_dict = {y: x for x, y in all_node_labels.to_dict().iteritems()}
+    mapping_dict = {y: x for x, y in all_node_labels.to_dict().items()}
     nodes_per_layer_filtered_df.index = nodes_per_layer_filtered_df.index.map(lambda x: mapping_dict[x])
     return nodes_per_layer_filtered_df
 
@@ -68,10 +68,10 @@ def plot_layers(layers, model_name, suffix):
     layers_df = layers_df[layers_df['source'] != layers_df['target']]
     layers_df = layers_df.reset_index()
     layers_df = layers_df[layers_df['value'] > 0.0]
-    print 'layers_df\n', layers_df.head()
+    print('layers_df\n', layers_df.head())
     encoded_top_genes, all_node_ids = encode_nodes(layers_df)
     # rename pathways
-    print 'encoded_top_genes\n', encoded_top_genes.head()
+    print('encoded_top_genes\n', encoded_top_genes.head())
     if reactome_labels:
         all_node_labels = get_pathway_names(all_node_ids)
     else:
@@ -88,7 +88,7 @@ def plot_layers(layers, model_name, suffix):
     node_colors['mutation'] = 'rgba(105, 189, 210, 0.7)'  # mutation
     node_colors_list = [node_colors[n] for n in all_node_labels]
 
-    print 'node_colors', node_colors_list
+    print('node_colors', node_colors_list)
 
     if color_direction:
         encoded_top_genes['color'] = encoded_top_genes['direction'].replace(
@@ -96,7 +96,7 @@ def plot_layers(layers, model_name, suffix):
     else:
         encoded_top_genes['color'] = 'rgba(255, 0 0, 0.2)'
 
-    print encoded_top_genes.head()
+    print(encoded_top_genes.head())
     data_trace, layout = get_data_trace(encoded_top_genes, all_node_labels, nodes_per_layer_filtered, node_colors_list)
     fig = dict(data=[data_trace], layout=layout)
 
@@ -125,19 +125,19 @@ def get_first_layer(node_weights, number_of_best_nodes, interesting_genes=[], co
 
     top_genes = top_genes + interesting_genes
     # gene normalization
-    print 'top_genes', top_genes
+    print('top_genes', top_genes)
     genes = gene_weights.loc[top_genes]
     genes[col_name] = np.log(1. + genes[col_name].abs())
 
-    print genes.shape
-    print genes.head()
+    print(genes.shape)
+    print(genes.head())
 
     df = feature_weights
 
     if include_others:
         df = df.reset_index()
-        print 'df'
-        print df.head()
+        print('df')
+        print(df.head())
         df.columns = ['target', 'source', 'value']
         df['target'] = df['target'].map(lambda x: x if x in top_genes else 'other0')
         df = df.groupby(['source', 'target']).sum()
@@ -166,10 +166,10 @@ def get_first_layer(node_weights, number_of_best_nodes, interesting_genes=[], co
 
     # multiply by the gene importance
     df = pd.merge(df, genes, left_on='target', right_index=True, how='inner')
-    print df.shape
+    print(df.shape)
     df.value = df.value * df.coef
 
-    print df.shape
+    print(df.shape)
 
     return df
 
@@ -182,7 +182,7 @@ nodes_per_layer0 = features_weights[['layer']]
 
 features_weights = features_weights[['coef']]
 
-print features_weights.head()
+print(features_weights.head())
 
 all_weights = pd.read_csv(join(module_path, './extracted/node_importance_graph_adjusted.csv'), index_col=0)
 genes_weights = all_weights[all_weights.layer == 1]
@@ -191,13 +191,13 @@ genes_weights = genes_weights[['coef_combined']]
 genes_weights.columns = ['coef']
 
 nodes_per_layer_df = pd.concat([nodes_per_layer0, nodes_per_layer1])
-print genes_weights.head()
-print 'genes_weights', genes_weights
+print(genes_weights.head())
+print('genes_weights', genes_weights)
 
 node_weights = [features_weights, genes_weights]
 number_of_best_nodes = 1
 interesting_genes = ['FOXA1', 'SPOP', 'MED12', 'CDK12', 'PIK3CA', 'CHD1', 'ZBTB7B']
 df = get_first_layer(node_weights, number_of_best_nodes, interesting_genes=interesting_genes, col_name='coef',
                      include_others=False)
-print df.head()
+print(df.head())
 plot_layers([df], 'first_layer_sankey', '')

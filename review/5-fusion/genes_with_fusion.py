@@ -67,11 +67,11 @@ genes_with_fusions_df = ranked.loc[genes_with_fusions, :].copy()
 
 genes_with_fusions_df['diff'] = (genes_with_fusions_df['Fusion (genes)'] - genes_with_fusions_df['no-Fusion']).abs()
 
-print genes_with_fusions_df.sort_values('diff')
+print(genes_with_fusions_df.sort_values('diff'))
 
 fusions_avg_rank = []
 for f in fusions:
     g1, g2 = f.split('--')
     avg_rank_diff = (genes_with_fusions_df.loc[g1, 'diff'] + genes_with_fusions_df.loc[g2, 'diff']) / 2.
     fusions_avg_rank.append(dict(Fusion=f, avg_rank_diff=avg_rank_diff))
-print pd.DataFrame(fusions_avg_rank).sort_values('avg_rank_diff')
+print(pd.DataFrame(fusions_avg_rank).sort_values('avg_rank_diff'))

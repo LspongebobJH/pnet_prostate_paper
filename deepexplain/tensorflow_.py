@@ -1,6 +1,6 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 import sys
 import warnings
@@ -102,7 +102,7 @@ class AttributionMethod(object):
         # print ('# of keys in feeding dict {}'.format( len(feed_dict.keys())))
         # print (self.has_multiple_inputs, T,feed_dict )
         # print ('feed_dict', feed_dict )
-        for key, value in feed_dict.iteritems():
+        for key, value in feed_dict.items():
             if type(value) == np.ndarray:
                 print(key, type(value), value.shape, value.dtype)
         return self.session.run(T, feed_dict)
@@ -308,7 +308,7 @@ class EpsilonLRP(GradientBasedMethod):
         import keras.backend as K
         grad = tf.gradients(K.mean(self.T), self.X)
         print(grad)
-        z = zip(grad, x)
+        z = list(zip(grad, x))
         print(z)
         ret = [g * x for g, x in z]
         return ret

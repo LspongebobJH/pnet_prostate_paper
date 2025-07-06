@@ -85,7 +85,7 @@ class MutEx(object):
         logging.info('permutation with {} cores'.format(pool._processes))
         partial_simul = partialmethod(self._one_permutation)
         simulated_results = pool.starmap(partial_simul.func,
-                                         zip(itertools.repeat(coverage, n), itertools.repeat(observation_signal, n)))
+                                         list(zip(itertools.repeat(coverage, n), itertools.repeat(observation_signal, n))))
         pool.close()  # we are not adding any more processes
         pool.join()  # tell it to wait until all threads are done before going on
 
@@ -139,7 +139,7 @@ def test():
     m = MutEx(background=df, permutations=1000)
 
     pd.set_option('display.max_columns', 1000)
-    print(df.loc[[0, 1, 2]])
+    print((df.loc[[0, 1, 2]]))
 
     print("\nExample - 1 thread \n----------")
 
@@ -154,7 +154,7 @@ def test():
     random.seed(18)
     group_generator = (random.sample(df.index.tolist(), random.sample([2, 3, 4], 1)[0]) for x in range(10))
     result_list = [m.calculate(g) for g in group_generator]
-    print(pd.DataFrame.from_records([r.__dict__ for r in result_list]))
+    print((pd.DataFrame.from_records([r.__dict__ for r in result_list])))
 
 
 if __name__ == "__main__":

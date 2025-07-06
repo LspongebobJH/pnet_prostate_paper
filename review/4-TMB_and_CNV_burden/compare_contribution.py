@@ -61,7 +61,7 @@ color = [D_id_color[i] for i in plot_df.index]
 
 fig, axes = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(6, 7), dpi=200)
 
-print plot_df
+print(plot_df)
 plot_df.T.plot.bar(stacked=True, color=color, rot=0)
 plt.subplots_adjust(bottom=0.3)
 plt.legend(ncol=3, fontsize=8, bbox_to_anchor=(.9, -0.1))
